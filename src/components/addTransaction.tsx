@@ -54,7 +54,9 @@ export default function AddTransaction() {
         <option value="income">収入</option>
         <option value="expense">支出</option>
       </select>
-      <button type="submit" className="button">追加</button>
+      <button type="submit" className="button">
+        追加
+      </button>
     </form>
   );
 }

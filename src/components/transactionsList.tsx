@@ -22,7 +22,9 @@ export default function TransactionsList() {
         <ul>
           {transactions.map((t) => (
             <li key={t.id} className="border border-gray-300 p-2 my-2 flex justify-between">
-              <span>{t.date} - {t.category} - {t.amount}円 ({t.type === "income" ? "収入" : "支出"})</span>
+              <span>
+                {t.date} - {t.category} - {t.amount}円 ({t.type === "income" ? "収入" : "支出"})
+              </span>
               <button
                 onClick={() => handleDelete(t.id)}
                 className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"

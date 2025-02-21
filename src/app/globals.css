@@ -44,11 +44,13 @@ body {
   @apply p-6 rounded shadow-md;
 }
 
-h1, h2 {
+h1,
+h2 {
   @apply text-xl font-bold text-gray-800;
 }
 
-input, select {
+input,
+select {
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   @apply p-2 w-full rounded text-gray-900;
