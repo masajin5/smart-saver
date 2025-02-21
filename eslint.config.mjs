@@ -10,7 +10,13 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
+  {
+    plugins: ["prettier"], // Prettier を ESLint に統合
+    rules: {
+      "prettier/prettier": ["error"], // Prettier のルール違反を ESLint でエラーにする
+    },
+  },
 ];
 
 export default eslintConfig;
