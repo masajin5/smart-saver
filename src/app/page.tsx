@@ -1,5 +1,5 @@
-import AddTransaction from "@/components/addTransaction";
-import TransactionsList from "@/components/transactionsList";
+import AddTransaction from "@/components/transactions/addTransaction";
+import TransactionsList from "@/components/transactions/transactionsList";
 
 export default function Home() {
   return (
