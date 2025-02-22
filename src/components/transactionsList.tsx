@@ -7,6 +7,15 @@ import {
   Transaction,
 } from "@/hooks/useTransaction";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function TransactionsList() {
   const { transactions, loading } = useTransactions();
@@ -20,7 +29,6 @@ export default function TransactionsList() {
   });
 
   const handleDelete = async (id: string) => {
-    if (!confirm("本当に削除しますか？")) return;
     await deleteTransaction(id);
     window.location.reload(); // 削除後に一覧を更新
   };
@@ -28,10 +36,11 @@ export default function TransactionsList() {
   const handleEdit = (transaction: any) => {
     setEditingId(transaction.id);
     setEditData({
-      ...editData,
+      id: transaction.id,
       amount: Number(transaction.amount),
       category: transaction.category,
       type: transaction.type,
+      date: transaction.date,
     });
   };
 
@@ -42,7 +51,6 @@ export default function TransactionsList() {
       ...editData,
       id: editingId,
       amount: Number(editData.amount),
-      date: new Date().toISOString(),
     });
 
     setEditingId(null);
@@ -50,70 +58,53 @@ export default function TransactionsList() {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-md">
-      <h2 className="text-xl font-bold text-gray-800">取引一覧</h2>
-      {loading ? (
-        <p className="text-gray-600">読み込み中...</p>
-      ) : transactions.length === 0 ? (
-        <p className="text-gray-600">取引がありません</p>
-      ) : (
-        <ul>
-          {transactions.map((t) => (
-            <li key={t.id} className="border border-gray-300 p-2 my-2 flex justify-between">
-              {editingId === t.id ? (
-                <div className="flex flex-col">
-                  <input
-                    type="number"
-                    value={editData.amount}
-                    onChange={(e) => setEditData({ ...editData, amount: Number(e.target.value) })}
-                    className="border p-1"
-                  />
-                  <input
-                    type="text"
-                    value={editData.category}
-                    onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                    className="border p-1 my-1"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleUpdate}
-                      className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                    >
-                      更新
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
-                    >
-                      キャンセル
-                    </button>
-                  </div>
+    <div className="flex justify-center">
+      <div className="w-full max-w-lg">
+        <h2 className="text-xl font-bold text-gray-800">取引一覧</h2>
+        {loading ? (
+          <p className="text-gray-600">読み込み中...</p>
+        ) : transactions.length === 0 ? (
+          <p className="text-gray-600">取引がありません</p>
+        ) : (
+          <ul>
+            {transactions.map((t) => (
+              <li
+                key={t.id}
+                className="border border-gray-300 p-3 my-2 flex justify-between items-center"
+              >
+                <span className="font-medium">
+                  {t.date} - {t.category} - {t.amount}円 ({t.type === "income" ? "収入" : "支出"})
+                </span>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={() => handleEdit(t)}
+                    variant="outline"
+                    className="text-black w-16 h-8"
+                  >
+                    編集
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" className="w-16 h-8">
+                        削除
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>本当に削除しますか？</DialogHeader>
+                      <DialogFooter>
+                        <Button onClick={() => handleDelete(t.id)} variant="destructive">
+                          削除
+                        </Button>
+                        <Button variant="secondary">キャンセル</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-              ) : (
-                <>
-                  <span>
-                    {t.date} - {t.category} - {t.amount}円 ({t.type === "income" ? "収入" : "支出"})
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(t)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => handleDelete(t.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    >
-                      削除
-                    </button>
-                  </div>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
