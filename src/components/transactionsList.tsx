@@ -33,11 +33,11 @@ export default function TransactionsList() {
     window.location.reload(); // 削除後に一覧を更新
   };
 
-  const handleEdit = (transaction: any) => {
+  const handleEdit = (transaction: Transaction) => {
     setEditingId(transaction.id);
     setEditData({
       id: transaction.id,
-      amount: Number(transaction.amount),
+      amount: transaction.amount,
       category: transaction.category,
       type: transaction.type,
       date: transaction.date,
@@ -68,38 +68,61 @@ export default function TransactionsList() {
         ) : (
           <ul>
             {transactions.map((t) => (
-              <li
-                key={t.id}
-                className="border border-gray-300 p-3 my-2 flex justify-between items-center"
-              >
-                <span className="font-medium">
-                  {t.date} - {t.category} - {t.amount}円 ({t.type === "income" ? "収入" : "支出"})
-                </span>
-                <div className="flex gap-4">
-                  <Button
-                    onClick={() => handleEdit(t)}
-                    variant="outline"
-                    className="text-black w-16 h-8"
-                  >
-                    編集
-                  </Button>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="destructive" className="w-16 h-8">
-                        削除
+              <li key={t.id} className="border border-gray-300 p-3 my-2 flex flex-col gap-2">
+                {editingId === t.id ? (
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      type="number"
+                      value={editData.amount}
+                      onChange={(e) => setEditData({ ...editData, amount: Number(e.target.value) })}
+                    />
+                    <Input
+                      type="text"
+                      value={editData.category}
+                      onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+                    />
+                    <div className="flex gap-2">
+                      <Button onClick={handleUpdate} variant="default">
+                        更新
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>本当に削除しますか？</DialogHeader>
-                      <DialogFooter>
-                        <Button onClick={() => handleDelete(t.id)} variant="destructive">
-                          削除
-                        </Button>
-                        <Button variant="secondary">キャンセル</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                      <Button onClick={() => setEditingId(null)} variant="secondary">
+                        キャンセル
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">
+                      {t.date} - {t.category} - {t.amount}円 (
+                      {t.type === "income" ? "収入" : "支出"})
+                    </span>
+                    <div className="flex gap-4">
+                      <Button
+                        onClick={() => handleEdit(t)}
+                        variant="outline"
+                        className="text-black w-16 h-8"
+                      >
+                        編集
+                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive" className="w-16 h-8">
+                            削除
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>本当に削除しますか？</DialogHeader>
+                          <DialogFooter>
+                            <Button onClick={() => handleDelete(t.id)} variant="destructive">
+                              削除
+                            </Button>
+                            <Button variant="secondary">キャンセル</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
