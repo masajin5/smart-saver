@@ -37,3 +37,23 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({ message: "Deleted successfully" }, { status: 200 });
 }
+
+export async function PATCH(req: Request) {
+  const { id, amount, category, type, date } = await req.json();
+
+  if (!id) {
+    return NextResponse.json({ error: "ID is required" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("transactions")
+    .update({ amount, category, type, date })
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ message: "Updated successfully" }, { status: 200 });
+}
+

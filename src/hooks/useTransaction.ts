@@ -3,7 +3,7 @@ import supabase from "@/lib/supabase";
 
 export interface Transaction {
   id: string;
-  type: "income" | "expense";
+  type: "income" | "expense" | "";
   amount: number;
   category: string;
   date: string;
@@ -58,4 +58,20 @@ export async function deleteTransaction(id: string) {
   }
 
   console.log("削除成功:", id);
+}
+
+export async function updateTransaction(transaction: Transaction) {
+  const res = await fetch("/api/transactions", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(transaction),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    console.error("更新エラー:", errorData.error);
+    return;
+  }
+
+  console.log("更新成功:", transaction.id);
 }
