@@ -7,6 +7,7 @@ export interface Transaction {
   amount: number;
   category: string;
   date: string;
+  user_id?: string;
 }
 
 export function useTransactions() {
@@ -15,14 +16,24 @@ export function useTransactions() {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      setLoading(true);
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError || !user?.user) {
+        console.error("ユーザー取得エラー:", userError);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .eq("user_id", user.user.id) // 🔥 ログインユーザーのデータのみ取得
         .order("date", { ascending: false });
 
-      if (error) console.error(error);
-      else setTransactions(data || []);
+      if (error) {
+        console.error("取引データ取得エラー:", error);
+      } else {
+        setTransactions(data || []);
+      }
       setLoading(false);
     };
 
@@ -33,45 +44,52 @@ export function useTransactions() {
 }
 
 export async function addTransaction(transaction: Omit<Transaction, "id">) {
-  console.log("追加するデータ:", transaction); // 🔍 デバッグ用ログ
-
-  const { data, error } = await supabase.from("transactions").insert([transaction]);
-
-  if (error) {
-    console.error("データ追加エラー:", error.message, error.details, error.hint);
-  } else {
-    console.log("データ追加成功:", data);
+  const { data: user, error: userError } = await supabase.auth.getUser();
+  if (userError || !user?.user) {
+    console.error("ユーザー情報取得エラー:", userError);
+    return;
   }
+
+  const { error } = await supabase
+    .from("transactions")
+    .insert([{ ...transaction, user_id: user.user.id }]); // 🔥 ユーザーIDを設定
+
+  if (error) console.error("データ追加エラー:", error);
 }
 
 export async function deleteTransaction(id: string) {
-  const res = await fetch("/api/transactions", {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id }),
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json();
-    console.error("削除エラー:", errorData.error);
+  const { data: user, error: userError } = await supabase.auth.getUser();
+  if (userError || !user?.user) {
+    console.error("ユーザー情報取得エラー:", userError);
     return;
   }
 
-  console.log("削除成功:", id);
+  const { error } = await supabase
+    .from("transactions")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.user.id); // 🔥 自分のデータのみ削除可能
+
+  if (error) console.error("データ削除エラー:", error);
 }
 
 export async function updateTransaction(transaction: Transaction) {
-  const res = await fetch("/api/transactions", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(transaction),
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json();
-    console.error("更新エラー:", errorData.error);
+  const { data: user, error: userError } = await supabase.auth.getUser();
+  if (userError || !user?.user) {
+    console.error("ユーザー情報取得エラー:", userError);
     return;
   }
 
-  console.log("更新成功:", transaction.id);
+  const { error } = await supabase
+    .from("transactions")
+    .update({
+      amount: transaction.amount,
+      category: transaction.category,
+      type: transaction.type,
+      date: transaction.date,
+    })
+    .eq("id", transaction.id)
+    .eq("user_id", user.user.id); // 🔥 自分のデータのみ更新可能
+
+  if (error) console.error("データ更新エラー:", error);
 }
